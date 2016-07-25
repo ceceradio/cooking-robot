@@ -62,7 +62,7 @@ function makeTweet() {
 }
 function startTweeting() {
     makeTweet();
-    setInterval(makeTweet, 60 * 1000);
+    setInterval(makeTweet, 15 * 60 * 1000);
 }
 
 loadDictionary()
