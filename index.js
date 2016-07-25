@@ -5,36 +5,15 @@ var Twitter = require('twitter');
 var twitterClient = new Twitter(config.twitter);
 
 var adjectives = [];
-var foodItems = [];
+var ingredients = [];
 var foodDishes = []
 
-function processDictionaryIntoAdjectives(data) {
-    var obj = JSON.parse(data);
-    adjectives = obj.adjs;
-}
-
-function cleanFoodItem(foodItem) {
-    if (foodItem.indexOf("(") > -1) {
-        var aside = foodItem.slice(foodItem.indexOf("("), foodItem.indexOf(")")+1);    
-    }
-    foodItem = foodItem.replace(aside, "");
-    foodItem = foodItem.toLowerCase();
-    foodItem = foodItem.split(/[\s]*,[\s]*/).reverse().join(" ");
-    if (aside) {
-        foodItem += " " + aside;
-    }
-    return foodItem;
-}
-function processFoodItemsIntoList(data) {
-    var items = JSON.parse(data);
-    for(var key in items) {
-        var foodItem = items[key];
-        foodItem = cleanFoodItem(foodItem);
-        foodItems.push(foodItem);
-    }
-}
 function loadDictionary() {
     return fsp.readFile("adjs.json", {encoding:"utf8"})
+}
+function processDictionaryIntoAdjectives(data) {
+    var obj = JSON.parse(data);
+    adjectives = obj;
 }
 function loadFoodDishes() {
     return requestp({
@@ -43,16 +22,20 @@ function loadFoodDishes() {
         json: true
     })
     .then(function(data) {
-        console.log("Loaded food items");
+        console.log("Loaded food dishes");
         foodDishes = data;
     })
-    setInterval(loadFoodDishes, 1000 * 60 * 60 * 24); // updated food items once a day
+    setInterval(loadFoodDishes, 1000 * 60 * 60 * 24); // updated food dishes once a day
 }
-function loadFoodItems() {
-    return fsp.readFile("food-items.json", {encoding:"utf8"})
+function loadIngredients() {
+    return fsp.readFile("ingredients.json", {encoding:"utf8"})
 }
-function getRandomFoodItem() {
-    return foodItems[Math.floor(Math.random() * foodItems.length)];
+function processIngredientsIntoList(data) {
+    var items = JSON.parse(data);
+    ingredients = items;
+}
+function getRandomIngredient() {
+    return ingredients[Math.floor(Math.random() * ingredients.length)];
 }
 function getRandomFoodDish() {
     return foodDishes[Math.floor(Math.random() * foodDishes.length)].name.toLowerCase();
@@ -69,7 +52,7 @@ function tweet(text) {
 }
 function makeTweet() {
     if (Math.random() >= 0.5) {
-        var foodString = getRandomAdjective() + " " + getRandomFoodItem();
+        var foodString = getRandomAdjective() + " " + getRandomIngredient();
         tweet("I picked up some "+foodString+" from the store.");
     }
     else {
@@ -86,8 +69,8 @@ loadDictionary()
 .then(loadFoodDishes)
 .then(loadDictionary)
 .then(processDictionaryIntoAdjectives)
-.then(loadFoodItems)
-.then(processFoodItemsIntoList)
+.then(loadIngredients)
+.then(processIngredientsIntoList)
 .then(startTweeting)
 .catch(function(error) {
     console.log("Promise error:");
