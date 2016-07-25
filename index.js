@@ -43,8 +43,10 @@ function loadFoodDishes() {
         json: true
     })
     .then(function(data) {
+        console.log("Loaded food items");
         foodDishes = data;
     })
+    setInterval(loadFoodDishes, 1000 * 60 * 60 * 24); // updated food items once a day
 }
 function loadFoodItems() {
     return fsp.readFile("food-items.json", {encoding:"utf8"})
